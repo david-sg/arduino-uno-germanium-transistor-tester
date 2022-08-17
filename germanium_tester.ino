@@ -1,7 +1,6 @@
 #include <Adafruit_ADS1X15.h>
 #include <SPI.h>
 #include <Wire.h>
-
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 
@@ -27,13 +26,16 @@ const int baseResistorPin = 7;      // arduino pin the base resistor is on
 int collectorPinState = 0;  // variable for reading the collector pin status
 int transistorType = 0;     // Type 0 is NPN, Type 1 is PNP
 
+long adc0avg = 0;
+long adc3avg = 0;
+
 void setup() {
     for (int i = 1; i < 13; i++) {
         pinMode(i, OUTPUT);
         digitalWrite(i, LOW);
     }
 
-    int16_t adc0, adc1, adc2, adc3, adc13;               // variables to hold the 16-bit ADC reading
+    int16_t adc0, adc3;               // variables to hold the 16-bit ADC reading
     float collector_milliVolts = 0.0; // variable to hold the collector voltage in milli-volts
     float rail_milliVolts = 0.0;      // variable to hold the rail voltage in milli-volts
     float leak_milliVolts = 0.0;      // variable to hold leakage voltage in milli-volts
@@ -143,10 +145,19 @@ void setup() {
     }
     delay(100); // added to try to stabilize the readings
     //   read in voltages from the 16-bit ADC
-    adc0 = ads.readADC_SingleEnded(0);
-    adc1 = ads.readADC_SingleEnded(1);
-    adc3 = ads.readADC_SingleEnded(3);
-    // rail voltage goes into ADC0 and collector voltage goes into ADC3
+    // set the adc to 0 to start the loop
+    adc0avg = 0;
+    adc3avg = 0;
+    for (int i = 0; i < 20; i++) {
+        adc0avg = adc0avg + ads.readADC_SingleEnded(0);
+        adc3avg = adc3avg + ads.readADC_SingleEnded(3);
+    }
+    adc0 = adc0avg / 20;
+    adc3 = adc3avg / 20;
+
+    //  adc0 = ads.readADC_SingleEnded(0);
+    //  adc3 = ads.readADC_SingleEnded(3);
+      // rail voltage goes into ADC0 and collector voltage goes into ADC3
     rail_milliVolts = computeMilliVolts(adc0);
     collector_milliVolts = computeMilliVolts(adc3) - gnd_adjust;
 
@@ -194,8 +205,12 @@ void setup() {
 
         delay(100); // added to try to stabilize the readings
         // read in voltages from the 16-bit ADC
-        adc0 = ads.readADC_SingleEnded(0);
-        adc3 = ads.readADC_SingleEnded(3);
+        for (int i = 0; i < 20; i++) {
+            adc0avg = adc0avg + ads.readADC_SingleEnded(0);
+            adc3avg = adc3avg + ads.readADC_SingleEnded(3);
+        }
+        adc0 = adc0avg / 20;
+        adc3 = adc3avg / 20;
 
         // rail voltage goes into ADC0 and collector voltage goes into ADC3
         rail_milliVolts = computeMilliVolts(adc0);
@@ -244,8 +259,8 @@ void setup() {
         // voltage, as this is an NPN transistor, we must subtract from the rail voltage to get leak
         // voltage
         leak_milliVolts = rail_milliVolts - collector_milliVolts;
-        Serial.print(" collector_milliVolts -t: ");
-        Serial.println(collector_milliVolts);
+        //    Serial.print(" collector_milliVolts -t: ");
+        //    Serial.println(collector_milliVolts);
         // in case we get any weird jitter on the collector pin
         if (leak_milliVolts < 0.1) {
             leak_milliVolts = 0.0;
@@ -276,9 +291,16 @@ void setup() {
         digitalWrite(baseResistorPin, HIGH); // Base goes to 5V via base resistor because it is NPN
         delay(100); // added to try to stabilize the readings
         // read in voltages from the 16-bit ADC
-        adc0 = ads.readADC_SingleEnded(0);
-        adc3 = ads.readADC_SingleEnded(3);
+        // testing averaging the values
 
+
+        for (int i = 0; i < 20; i++) {
+            adc0avg = adc0avg + ads.readADC_SingleEnded(0);
+            adc3avg = adc3avg + ads.readADC_SingleEnded(3);
+        }
+        adc0 = adc0avg / 20;
+        adc3 = adc3avg / 20;
+        //    Serial.println(adc0);
         // rail voltage goes into ADC0 and collector voltage goes into ADC3
         rail_milliVolts = computeMilliVolts(adc0);
         collector_milliVolts = computeMilliVolts(adc3) - gnd_adjust;
