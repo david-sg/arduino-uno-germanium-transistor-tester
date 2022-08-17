@@ -89,7 +89,7 @@ void setup() {
     digitalWrite(emitterPin, LOW);  // set the emitter pin to GND
     digitalWrite(basePin, HIGH);    // set the base pin to 5V
 
-    delay(300);  // wait a moment
+    delay(100);  // wait a moment
 
     // see what the voltage is on the collector pin
     collectorPinState = digitalRead(collectorPin);
