@@ -148,7 +148,7 @@ void setup() {
     // set the adc to 0 to start the loop
     adc0avg = 0;
     adc3avg = 0;
-    for (int i = 0; i < 20; i++) {
+    for (int i = 1; i < 21; i++) {
         adc0avg = adc0avg + ads.readADC_SingleEnded(0);
         adc3avg = adc3avg + ads.readADC_SingleEnded(3);
     }
@@ -205,7 +205,9 @@ void setup() {
 
         delay(100); // added to try to stabilize the readings
         // read in voltages from the 16-bit ADC
-        for (int i = 0; i < 20; i++) {
+        adc0avg = 0;
+        adc3avg = 0;
+        for (int i = 1; i < 21; i++) {
             adc0avg = adc0avg + ads.readADC_SingleEnded(0);
             adc3avg = adc3avg + ads.readADC_SingleEnded(3);
         }
@@ -215,7 +217,6 @@ void setup() {
         // rail voltage goes into ADC0 and collector voltage goes into ADC3
         rail_milliVolts = computeMilliVolts(adc0);
         collector_milliVolts = computeMilliVolts(adc3) - gnd_adjust;
-
         // gain is collector-voltage / collector-resistance / base-current
         // so if we have 750 millivolts on the collector after applying 4uA of current to the base pin,
         // and we are using a 1K resistor for the collector resistor, the our gain calculation would look like this:
@@ -293,18 +294,20 @@ void setup() {
         // read in voltages from the 16-bit ADC
         // testing averaging the values
 
-
-        for (int i = 0; i < 20; i++) {
+        adc0avg = 0;
+        adc3avg = 0;
+        for (int i = 1; i < 21; i++) {
             adc0avg = adc0avg + ads.readADC_SingleEnded(0);
             adc3avg = adc3avg + ads.readADC_SingleEnded(3);
         }
         adc0 = adc0avg / 20;
         adc3 = adc3avg / 20;
-        //    Serial.println(adc0);
+     
         // rail voltage goes into ADC0 and collector voltage goes into ADC3
         rail_milliVolts = computeMilliVolts(adc0);
         collector_milliVolts = computeMilliVolts(adc3) - gnd_adjust;
 
+      
         // because the collector voltage is in reference to the rail voltage, we have to subtract from the rail voltage
         // gain is collector-voltage / collector-resistance / base-current
         // so if we have 750 millivolts on the collector after applying 4uA of current to the base pin,
@@ -354,9 +357,9 @@ void setup() {
     display.print("PWR Rail:");
     display.print(rail_milliVolts);
     display.println("mV");
-    display.print("Base Current:");
+    display.print("BaseCurrent:");
     display.print(baseCurrent_uA);
-    display.println("uA");
+    display.print("uA");
 
     display.display();
 
